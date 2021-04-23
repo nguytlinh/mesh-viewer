@@ -19,6 +19,19 @@ Mesh theModel;
 int theCurrentModel = 0;
 vector<string> theModelNames;
 
+float lastX = 250.0f;
+float lastY = 250.0f;
+float dist = 3.0f;
+float elevation = 0.0f;
+float azimuth = 0.0f;
+bool mouse_rotate = false;
+bool zoom = false;
+
+glm::mat4 transform(1.0);
+glm::mat4 projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.1f, 10.0f);
+glm::vec3 lookfrom;
+glm::mat4 camera;
+
 // OpenGL IDs
 GLuint theVboPosId;
 GLuint theVboNormalId;
@@ -87,17 +100,39 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
    int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
    if (state == GLFW_PRESS)
    {
+       mouse_rotate = true;
        int keyPress = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
-       if (keyPress == GLFW_PRESS) {}
+       if (keyPress == GLFW_PRESS) { zoom = true; }
+       else { zoom = false; }
    }
    else if (state == GLFW_RELEASE)
    {
+       mouse_rotate = false;
+       zoom = false;
    }
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
    // TODO: Camera controls
+    if (mouse_rotate) {
+        float distX = xpos - lastX;
+        float distY = ypos - lastY;
+
+        if (zoom) {
+            dist = dist + distY * 0.2f;
+            dist = dist - distX * 0.2f;
+        }
+        else {
+            azimuth = azimuth - distX;
+            elevation = elevation + distY;
+            if (elevation > 89.9f) elevation = 89.9f;
+            if (elevation < -89.9f) elevation = -89.9f;
+        }
+
+    }
+    lastX = xpos;
+    lastY = ypos;
 }
 
 static void PrintShaderErrors(GLuint id, const std::string label)
