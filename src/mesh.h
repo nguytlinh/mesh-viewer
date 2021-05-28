@@ -1,56 +1,53 @@
-
 #ifndef meshmodel_H_
 #define meshmodel_H_
 
 #include "AGLM.h"
 
 namespace agl {
-   class Mesh
-   {
-   public:
+    class Mesh
+    {
 
-      Mesh();
+    public:
 
-      virtual ~Mesh();
+        Mesh();
 
-      // Initialize this object with the given file
-      // Returns true if successfull. false otherwise.
-      bool loadPLY(const std::string& filename);
+        virtual ~Mesh();
 
-      // Return the minimum point of the axis-aligned bounding box
-      glm::vec3 getMinBounds() const;
+        // Initialize this object with the given file
+        // Returns true if successfull. false otherwise.
+        bool loadPLY(const std::string& filename);
 
-      // Return the maximum point of the axis-aligned bounding box
-      glm::vec3 getMaxBounds() const;
+        // Return the minimum point of the axis-aligned bounding box
+        glm::vec3 getMinBounds() const;
 
-      // Return number of vertices in this model
-      int numVertices() const;
+        // Return the maximum point of the axis-aligned bounding box
+        glm::vec3 getMaxBounds() const;
 
-      // Positions in this model
-      float* positions() const;
+        // Return number of vertices in this model
+        int numVertices() const;
 
-      // Normals in this model
-      float* normals() const;
+        // Positions in this model
+        float* positions() const;
 
-      // Return number of faces in this model
-      int numTriangles() const;
+        // Normals in this model
+        float* normals() const;
 
-      // face indices in this model
-      unsigned int* indices() const;
+        // Return number of faces in this model
+        int numTriangles() const;
 
+        // face indices in this model
+        unsigned int* indices() const;
 
-   private:
-       int vertices;
-       int faces;
-       float* pos_arr;
-       float* norm_arr;
-       unsigned int* ind_arr;
-       glm::vec3 min_bound;
-       glm::vec3 max_bound;
-   };
+    private:
+        int vertices;
+        int faces;
+        float* pos_arr;
+        float* norm_arr;
+        unsigned int* ind_arr;
+        glm::vec3 min_bound;
+        glm::vec3 max_bound;
 
-
-
+    };
 
 }
 

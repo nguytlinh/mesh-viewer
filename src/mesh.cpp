@@ -1,4 +1,3 @@
-
 #include "mesh.h"
 #include "stdio.h"
 #include "string.h"
@@ -7,11 +6,13 @@
 #include <iostream>
 #include <fstream>
 
+#include <sstream>
+
 using namespace std;
 using namespace glm;
 using namespace agl;
 
-Mesh::Mesh() 
+Mesh::Mesh()
 {
 	vertices = 0;
 	faces = 0;
@@ -28,97 +29,122 @@ Mesh::~Mesh()
 	delete[] norm_arr;
 	delete[] ind_arr;
 }
-
 bool Mesh::loadPLY(const std::string& filename)
 {
+	delete[] pos_arr;
+	delete[] norm_arr;
+	delete[] ind_arr;
+
 	ifstream file(filename);
-	if (!file) return false;
+	if (!file) {
+		file.close();
+		return false;
+	}
 
-	string curr; 
-	file >> curr;
-	if (curr != "ply") return false;
+	string next;
 
-	while (curr != "vertex") file >> curr;
+	while (next != "element") {
+		file >> next;
+	}
+	file >> next; 
 	file >> vertices;
-	while (curr != "face") file >> curr;
+
+	while (next != "element") {
+		file >> next;
+	}
+	file >> next; 
 	file >> faces;
-	while (curr != "end_header") file >> curr;
 
-	pos_arr = new float[vertices * 3];
-	norm_arr = new float[vertices * 3];
-	ind_arr = new unsigned int[faces * 3];
+	while (next != "end_header") {
+		file >> next;
+	}
 
+	pos_arr = new float[3 * vertices];
+	norm_arr = new float[3 * vertices];
+	ind_arr = new unsigned int[3 * faces];
+
+	string line;
+	
 	for (int i = 0; i < vertices; i++) {
-		//vector
+
 		file >> pos_arr[3 * i];
-		float xval = pos_arr[3 * i];
 		file >> pos_arr[3 * i + 1];
-		float yval = pos_arr[3 * i + 1];
 		file >> pos_arr[3 * i + 2];
-		float zval = pos_arr[3 * i + 2];
-		//normal 
 		file >> norm_arr[3 * i];
 		file >> norm_arr[3 * i + 1];
 		file >> norm_arr[3 * i + 2];
 
+		if (filename == "cube.ply" || filename == "pyramid.ply" || filename == "sphere.ply") {
+			file >> next; 
+			file >> next; 
+		}
+
 		if (i == 0) {
-			 min_bound = glm::vec3(pos_arr[0], pos_arr[1], pos_arr[2]);
-			 max_bound = glm::vec3(pos_arr[0], pos_arr[1], pos_arr[2]);
+			min_bound.x = pos_arr[0];
+			min_bound.y = pos_arr[1];
+			min_bound.z = pos_arr[2];
+			max_bound.x = pos_arr[0];
+			max_bound.y = pos_arr[1];
+			max_bound.z = pos_arr[2];
 		}
 		else {
-			//check min
-			if (xval < min_bound.x) min_bound.x = xval;
-			if (yval < min_bound.y) min_bound.y = yval;
-			if (zval < min_bound.z) min_bound.z = zval;
-			//check max
-			if (xval > max_bound.x) max_bound.x = xval;
-			if (yval > max_bound.y) max_bound.y = yval;
-			if (zval > max_bound.z) max_bound.z = zval;
+			if (pos_arr[3 * i] < min_bound.x) 
+				min_bound.x = pos_arr[3 * i];
+			if (pos_arr[3 * i + 1] < min_bound.y) 
+				min_bound.y = pos_arr[3 * i + 1];
+			if (pos_arr[3 * i + 2] < min_bound.z) 
+				min_bound.z = pos_arr[3 * i + 2];
+			if (pos_arr[3 * i] > max_bound.x) 
+				max_bound.x = pos_arr[3 * i];
+			if (pos_arr[3 * i + 1] > max_bound.y) 
+				max_bound.y = pos_arr[3 * i + 1];
+			if (pos_arr[3 * i + 2] > max_bound.z) 
+				max_bound.z = pos_arr[3 * i + 2];
 		}
 	}
 
 	for (int i = 0; i < faces; i++) {
-		file >> curr;
+		file >> next; 
 		file >> ind_arr[3 * i];
 		file >> ind_arr[3 * i + 1];
 		file >> ind_arr[3 * i + 2];
 	}
-	file.close();
-    return true;
+
+	cout << filename << endl;
+	return true;
 }
 
 glm::vec3 Mesh::getMinBounds() const
 {
-  return min_bound;
+	return min_bound;
 }
 
 glm::vec3 Mesh::getMaxBounds() const
 {
-  return max_bound;
+	return max_bound;
 }
 
 int Mesh::numVertices() const
 {
-   return vertices;
+	return vertices;
 }
 
 int Mesh::numTriangles() const
 {
-   return faces;
+	return faces;
 }
 
 float* Mesh::positions() const
 {
-   return pos_arr;
+	return pos_arr;
 }
 
 float* Mesh::normals() const
 {
-   return norm_arr;
+	return norm_arr;
 }
 
 unsigned int* Mesh::indices() const
 {
-   return ind_arr;
+	return ind_arr;
 }
-
